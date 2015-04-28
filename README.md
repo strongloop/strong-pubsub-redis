@@ -1,6 +1,6 @@
 # strong-pubsub-redis
 
-**An MQTT `Adapter` for strong-pubsub**
+**Redis `Adapter` for strong-pubsub**
 
 ## Installation
 
