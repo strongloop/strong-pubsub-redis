@@ -2,7 +2,7 @@ var helpers = require('strong-pubsub-test');
 var getPort = helpers.getFreePort;
 var defineClientTests = helpers.defineClientTests;
 var usingRedis = helpers.usingRedis;
-var Client = require('../../strong-pubsub');
+var Client = require('strong-pubsub');
 var Adapter = require('../'); // strong-pubsub-redis
 
 describe('Redis', function () {

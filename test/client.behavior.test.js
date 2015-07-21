@@ -1,4 +1,4 @@
-var Client = require('../../strong-pubsub');
+var Client = require('strong-pubsub');
 var Adapter = require('../'); // strong-pubsub-redis
 var helpers = require('strong-pubsub-test');
 var defineClientBehaviorTests = helpers.defineClientBehaviorTests;
