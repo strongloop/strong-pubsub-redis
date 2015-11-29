@@ -65,8 +65,17 @@ Adapter.prototype.connect = function(cb) {
 }
 
 Adapter.prototype.end = function(cb) {
-  this.redisPubClient.end();
-  this.redisSubClient.end();
+  // redis client doesn't offer a callback arg
+  // or return any way to determine success, so we
+  // wrap this call in a try/catch block
+  try {
+    this.redisPubClient.end();
+    this.redisSubClient.end();
+    cb();
+  } catch(e) {
+    // this is unlikely / impossible?
+    cb(e);
+  }
 }
 
 /**
