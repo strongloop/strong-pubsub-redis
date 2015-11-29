@@ -65,8 +65,8 @@ Adapter.prototype.connect = function(cb) {
 }
 
 Adapter.prototype.end = function(cb) {
-  this.pubClient.end();
-  this.subClient.end();
+  this.redisPubClient.end();
+  this.redisSubClient.end();
 }
 
 /**
@@ -101,9 +101,9 @@ Adapter.prototype.publish = function(topic, message, options, cb) {
  *
  * @callback {Function} callback Called once the adapter has finished subscribing.
  * @param {Error} err An error object is included if an error was supplied by the adapter.
- * @param {Object[]} granted An array of topics granted formatted as an object `{topic: 't', qos: n}`. 
- * @param {String} granted[n].topic The topic granted 
- * @param {String} granted[n].qos The qos for the topic 
+ * @param {Object[]} granted An array of topics granted formatted as an object `{topic: 't', qos: n}`.
+ * @param {String} granted[n].topic The topic granted
+ * @param {String} granted[n].qos The qos for the topic
  */
 
 Adapter.prototype.subscribe = function(topic, options, cb) {
