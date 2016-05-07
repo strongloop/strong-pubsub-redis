@@ -70,8 +70,8 @@ Adapter.prototype.connect = function(cb) {
 }
 
 Adapter.prototype.end = function(cb) {
-  this.pubClient.end();
-  this.subClient.end();
+  this.redisPubClient.end();
+  this.redisSubClient.end();
 }
 
 /**
