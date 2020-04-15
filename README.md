@@ -1,6 +1,6 @@
 # strong-pubsub-redis
 
-**[Redis](http://redis.io/) `Adapter` for strong-pubsub**
+**[Redis](http://redis.io/) `Adapter` for strong-pubsub with support for auth**
 
 ## Installation
 
