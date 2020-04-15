@@ -11,7 +11,8 @@ var inherits = require('util').inherits;
 var debug = require('debug')('strong-pubsub:redis');
 var defaults = require('lodash').defaults;
 
-function noop() {};
+function noop() {
+};
 
 /**
  * The **Redis** `Adapter`.
@@ -20,58 +21,69 @@ function noop() {};
  */
 
 function Adapter(client) {
-  var adapter = this;
-  this.client = client;
-  var options = this.options = client.options;
+    var adapter = this;
+    this.client = client;
+    var options = this.options = client.options;
 }
 
 inherits(Adapter, EventEmitter);
 
-Adapter.prototype.connect = function(cb) {
-  var adapter = this;
-  var client = this.client;
-  var options = this.options;
-  var pubClient = this.redisPubClient = redis.createClient(
-    this.options.port,
-    this.options.host,
-    this.options.redis
-  );
-  var subClient = this.redisSubClient = redis.createClient(
-    this.options.port,
-    this.options.host,
-    this.options.redis
-  );
+Adapter.prototype.connect = function (cb) {
+    var adapter = this;
+    var client = this.client;
+    var options = this.options;
+    options.port = options.port || 6379;   // 6379 is Redis' default
+    options.host = options.host || '127.0.0.1';
+    var pubClient = this.redisPubClient = redis.createClient(
+        this.options.port,
+        this.options.host,
+        this.options.redis
+    );
+    var subClient = this.redisSubClient = redis.createClient(
+        this.options.port,
+        this.options.host,
+        this.options.redis
+    );
 
-  var connacks = 0;
-  var clients = this.clients = new EventEmitter();
-
-  subClient.once('connect', onConnect);
-  pubClient.once('connect', onConnect);
-  pubClient.on('error', clients.emit.bind(clients, 'error'));
-  subClient.on('error', clients.emit.bind(clients, 'error'));
-
-  function onConnect() {
-    connacks++;
-    if(connacks === 2) {
-      clients.emit('connect');
+    if (options.auth) {
+        pubClient.auth(options.auth, (d) => {
+            console.log("[Redis]: Authenticated for publish client");
+        });
+        subClient.auth(options.auth, (d) => {
+            console.log("[Redis]: Authenticated for subscribe client");
+        });
     }
-  }
 
-  this.clients.once('connect', function() {
-    adapter.clients.removeListener('error', cb);
-    cb();
-  });
+    var connacks = 0;
+    var clients = this.clients = new EventEmitter();
 
-  this.clients.once('error', cb);
+    subClient.once('connect', onConnect);
+    pubClient.once('connect', onConnect);
+    pubClient.on('error', clients.emit.bind(clients, 'error'));
+    subClient.on('error', clients.emit.bind(clients, 'error'));
 
-  subClient.on('message', function(topic, message, options) {
-    client.emit('message', topic, message, options);
-  });
+    function onConnect() {
+        connacks++;
+        if (connacks === 2) {
+            clients.emit('connect');
+        }
+    }
+
+    this.clients.once('connect', function () {
+        adapter.clients.removeListener('error', cb);
+        cb();
+    });
+
+    this.clients.once('error', cb);
+
+    subClient.on('message', function (topic, message, options) {
+        client.emit('message', topic, message, options);
+    });
 }
 
-Adapter.prototype.end = function(cb) {
-  this.pubClient.end();
-  this.subClient.end();
+Adapter.prototype.end = function (cb) {
+    this.pubClient.end();
+    this.subClient.end();
 }
 
 /**
@@ -93,8 +105,8 @@ Adapter.prototype.end = function(cb) {
  * @param {Error} err An error object is included if an error was supplied by the adapter.
  */
 
-Adapter.prototype.publish = function(topic, message, options, cb) {
-  this.redisPubClient.publish(topic, message, cb);
+Adapter.prototype.publish = function (topic, message, options, cb) {
+    this.redisPubClient.publish(topic, message, cb);
 }
 
 /**
@@ -106,13 +118,13 @@ Adapter.prototype.publish = function(topic, message, options, cb) {
  *
  * @callback {Function} callback Called once the adapter has finished subscribing.
  * @param {Error} err An error object is included if an error was supplied by the adapter.
- * @param {Object[]} granted An array of topics granted formatted as an object `{topic: 't', qos: n}`. 
- * @param {String} granted[n].topic The topic granted 
- * @param {String} granted[n].qos The qos for the topic 
+ * @param {Object[]} granted An array of topics granted formatted as an object `{topic: 't', qos: n}`.
+ * @param {String} granted[n].topic The topic granted
+ * @param {String} granted[n].qos The qos for the topic
  */
 
-Adapter.prototype.subscribe = function(topic, options, cb) {
-  this.redisSubClient.subscribe(topic, cb);
+Adapter.prototype.subscribe = function (topic, options, cb) {
+    this.redisSubClient.subscribe(topic, cb);
 }
 
 /**
@@ -123,6 +135,6 @@ Adapter.prototype.subscribe = function(topic, options, cb) {
  * @param {Error} err An error object is included if an error was supplied by the adapter.
  */
 
-Adapter.prototype.unsubscribe = function(topic, cb) {
-  this.redisSubClient.unsubscribe(topic, cb);
+Adapter.prototype.unsubscribe = function (topic, cb) {
+    this.redisSubClient.unsubscribe(topic, cb);
 }
